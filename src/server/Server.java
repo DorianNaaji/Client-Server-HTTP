@@ -17,9 +17,7 @@ public class Server implements Runnable
     }
 
     public void createConnexion(Socket _socket){
-    	
     	new Thread(new Communication(_socket)).start();
-    	
     }
 
   
@@ -37,8 +35,6 @@ public class Server implements Runnable
     			e.printStackTrace();
     		}
     	}
-    	
-
     }
 
     public static void main(String[] args) {
