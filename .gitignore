@@ -5,3 +5,8 @@ manifest.mf
 .project
 .settings
 bin
+
+# IntelliJ IDEA
+.idea/*
+.out/*
+
