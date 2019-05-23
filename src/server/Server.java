@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server
+public class Server implements Runnable
 {
 
     public static final int defaultPort = 1026;
@@ -16,7 +16,9 @@ public class Server
         _serverSocket = new ServerSocket(port);
     }
 
+    public void createConnexion(){
 
+    }
 
     public void get(){
 
@@ -26,8 +28,12 @@ public class Server
 
     }
 
-    public static void main(String[] args) {
+    @Override
+    public void run() {
 
     }
 
+    public static void main(String[] args) {
+
+    }
 }
