@@ -90,6 +90,14 @@ public class JFormClientHTTP extends javax.swing.JFrame
 
         jLabel4.setText("Port serveur");
 
+        _tbLocalFile.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                _tbLocalFileActionPerformed(evt);
+            }
+        });
+
         jLabel5.setText("Fichier local");
 
         _buttonBrowse.setText("Rechercher...");
@@ -103,7 +111,7 @@ public class JFormClientHTTP extends javax.swing.JFrame
 
         jLabel1.setText("Fichier distant");
 
-        _buttonPUT_localFile_TO_DistantFile.setText("Requête PUT du fichier local au fichier distant");
+        _buttonPUT_localFile_TO_DistantFile.setText("Requête PUT");
         _buttonPUT_localFile_TO_DistantFile.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
@@ -119,45 +127,44 @@ public class JFormClientHTTP extends javax.swing.JFrame
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
+                        .addGap(122, 122, 122)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(245, 245, 245)
+                        .addComponent(_buttonPut)))
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
                         .addGap(27, 27, 27)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addGap(15, 15, 15))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(_tbLocalFile)
-                            .addComponent(_tbDistantFile, javax.swing.GroupLayout.Alignment.LEADING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(_buttonGet)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(_buttonBrowse)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(_buttonPUT_localFile_TO_DistantFile))))
+                                .addComponent(_tbDistantFile, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(_buttonGet)
+                                .addGap(89, 89, 89))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel5))
+                                .addGap(15, 15, 15)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(_tbPort, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
+                                        .addComponent(_tbIpServer))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(_tbLocalFile, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(_buttonBrowse)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(_buttonPUT_localFile_TO_DistantFile))))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(_tbPort, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
-                            .addComponent(_tbIpServer))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(100, 100, 100)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(131, 131, 131)
-                        .addComponent(_buttonPut))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(76, 76, 76)
+                        .addGap(196, 196, 196)
                         .addComponent(jLabel2)))
-                .addGap(0, 303, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -176,18 +183,18 @@ public class JFormClientHTTP extends javax.swing.JFrame
                     .addComponent(jLabel5)
                     .addComponent(_buttonBrowse)
                     .addComponent(_buttonPUT_localFile_TO_DistantFile))
-                .addGap(50, 50, 50)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(_tbDistantFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1)
                     .addComponent(_buttonGet))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+                .addGap(42, 42, 42)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(_buttonPut)
-                .addContainerGap())
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         pack();
@@ -207,9 +214,38 @@ public class JFormClientHTTP extends javax.swing.JFrame
             String localPath = this._tbLocalFile.getText();
             String fileName = localPath.substring(localPath.lastIndexOf("\\") + 1);
             int res = Client.PUT(ipServer, port, fileName, localPath);
+            this.interprateReturnCode(res);
             System.out.println(res);
         }
     }//GEN-LAST:event__buttonPUT_localFile_TO_DistantFileActionPerformed
+
+    private void interprateReturnCode(int resultCode)
+    {
+        switch (resultCode)
+        {
+            case 0:
+                System.out.println("success");
+                break;
+            case -1:
+                JOptionPane.showMessageDialog(null, "Une erreur de flux est survenue. Veuillez contacter un administrateur.");
+                break;
+            case -2:
+                JOptionPane.showMessageDialog(null, "Une erreur est survenue lors de la fermeture des sockets. Veuillez contacter un administrateur.");
+                break;
+            case -3:
+                JOptionPane.showMessageDialog(null, "Une erreur lors de l'ouverture du socket est survenue. Veuillez contacter un administrateur.");
+                break;
+            case -4:
+                JOptionPane.showMessageDialog(null, "Le format de fichier utilisé pour la requête PUT/GET n'est pas géré par le programme.");
+                break;
+            case -5:
+                JOptionPane.showMessageDialog(null, "Impossible de lire ou ouvrir le fichier local spécifié.");
+                break;
+            case -6:
+                JOptionPane.showMessageDialog(null, "Impossible d'écrire le fichier spécifié dans un flux. Veuillez contacter un administrateur");
+                break;
+        }
+    }
 
     private void _buttonGetActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event__buttonGetActionPerformed
     {//GEN-HEADEREND:event__buttonGetActionPerformed
@@ -221,20 +257,16 @@ public class JFormClientHTTP extends javax.swing.JFrame
 
     private void _buttonPutActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event__buttonPutActionPerformed
     {//GEN-HEADEREND:event__buttonPutActionPerformed
-        if (this.verifPUT_ready())
+        if (this.verifPUTtext_ready())
         {
 
         }
     }//GEN-LAST:event__buttonPutActionPerformed
 
-    private void execPUT_localFile_TO_DistantFile()
-    {
-    }
-
-    private void execPUT_TextArea_TO_DistantFile()
-    {
-
-    }
+    private void _tbLocalFileActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event__tbLocalFileActionPerformed
+    {//GEN-HEADEREND:event__tbLocalFileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event__tbLocalFileActionPerformed
 
     /**
      * Vérifie si les TBs ne sont pas vides pour commencer le traitement du PUT.
@@ -261,9 +293,42 @@ public class JFormClientHTTP extends javax.swing.JFrame
             errorMessage += "- Renseigner un fichier local\n";
             res = false;
         }
+        if (res == false)
+        {
+            JOptionPane.showMessageDialog(null, errorMessage);
+        }
+        return res;
+    }
+
+    /**
+     * Vérifie si les TBs ne sont pas vides pour commencer le traitement du PUT
+     * avec la textArea.
+     *
+     * @returntrue si les TBs concernées par le PUT ne sont pas vides. False
+     * sinon
+     */
+    private boolean verifPUTtext_ready()
+    {
+        boolean res = true;
+        String errorMessage = "Impossible d'aboutir à votre demande. Veuillez s'il vous plaît :\n";
+        if (this._tbIpServer.getText().equals(""))
+        {
+            errorMessage += "- Renseigner une IP serveur,\n";
+            res = false;
+        }
+        if (this._tbPort.getText().equals(""))
+        {
+            errorMessage += "- Renseigner un port serveur\n";
+            res = false;
+        }
         if (this._tbDistantFile.getText().equals(""))
         {
-            errorMessage += "- Renseigner un fichier distant";
+            errorMessage += "- Renseigner un fichier distant\n";
+            res = false;
+        }
+        if (this._textAreaPUT.getText().equals(""))
+        {
+            errorMessage += "- Renseigner du texte à envoyer\n";
             res = false;
         }
         if (res == false)

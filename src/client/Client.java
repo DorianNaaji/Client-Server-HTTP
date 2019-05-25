@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import utils.strUtils;
 
 public class Client
@@ -18,7 +21,8 @@ public class Client
         Socket sc = null;
         try
         {
-            sc = new Socket(InetAddress.getByName(adIP), port);
+            InetAddress server = InetAddress.getByName(adIP);
+            sc = new Socket(server, port);
         }
         catch (UnknownHostException ex)
         {
@@ -47,6 +51,7 @@ public class Client
      * -4 : UnknownFileFormatException ex
      * -5 : Impossible de lire/ouvrir le fichier
      * -6 : Impossible d'écrire le fichier spécifié dans un flux
+     * -7 : Erreur de timeout Socket
      */
     public static int PUT(String ipServer, int port, String fileName, String localFilePath)
     {
@@ -97,21 +102,29 @@ public class Client
         }
 
         Socket sock = OpenSocket(ipServer, port);
-        if (sock == null)
+        try
         {
-            // -3 en cas d'erreur d'ouverture
-            System.out.println("Erreur lors de l'ouverture du socket (Methode OpenSocket())");
+            if (sock == null)
+            {
+                // -3 en cas d'erreur d'ouverture
+                System.out.println("Erreur lors de l'ouverture du socket (Methode OpenSocket())");
+                return -3;
+            }
+        }
+        catch (NullPointerException ex)
+        {
+            System.out.println("Exception : " + ex);
             return -3;
         }
+
         try
         {
             OutputStream outputStream = sock.getOutputStream();
             // Envoyer la requête vers le serveur : "écrire sur le document 'doc.html'
             // Le serveur répond. Sa répojnse contient le document ou la raison du refus
-            //outputStream.write()
             String url = "http://" + ipServer + ":" + port;
             String httpPUTRequest = "PUT /" + fileName + " HTTP/1.1 \r\n";
-            httpPUTRequest += "Host: " + ipServer;
+            httpPUTRequest += "Host: " + ipServer + "\r\n";
             try
             {
                 httpPUTRequest += "Content-type: " + strUtils.getContentType(fileName) + " \r\n";
@@ -125,7 +138,9 @@ public class Client
             }
             if (isImg && fileInBytes != null)
             {
-                httpPUTRequest += "Content-length: " + fileInBytes.length + "\r\n\n";
+                // (+1 car on compte le retour chariot après le header Content-length)
+                int length = fileInBytes.length + 1;
+                httpPUTRequest += "Content-length: " + length + "\r\n\n";
                 for (int i = 0; i < fileInBytes.length; i++)
                 {
                     httpPUTRequest += fileInBytes[i];
@@ -133,7 +148,8 @@ public class Client
             }
             else if (!isImg && fileInString != null)
             {
-                httpPUTRequest += "Content-length: " + fileInString.length() + "\r\n\n";
+                int length = fileInString.length() + 1;
+                httpPUTRequest += "Content-length: " + length + "\r\n\n";
                 httpPUTRequest += fileInString;
             }
             else
