@@ -3,20 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package client;
-
-import graphical.JFormClientHTTP;
+package CustomedExceptions;
 
 /**
  *
  * @author Dorian
  */
-public class Main
+public class UnknownFileFormatException extends Exception
 {
 
-    public static void main(String[] args)
+    public UnknownFileFormatException(String errorMessage)
     {
-        JFormClientHTTP form = new JFormClientHTTP();
-        form.setVisible(true);
+        super(errorMessage);
     }
+
 }
