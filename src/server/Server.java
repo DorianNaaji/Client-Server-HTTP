@@ -27,6 +27,7 @@ public class Server implements Runnable
     	while(true)
     	{
     		try {
+                System.out.println("[SERVER] Listening...");
     			_socket=_serverSocket.accept();
     			createConnexion(_socket);
     			
@@ -38,6 +39,10 @@ public class Server implements Runnable
     }
 
     public static void main(String[] args) {
-
+        try {
+            new Thread(new Server(Server.defaultPort)).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

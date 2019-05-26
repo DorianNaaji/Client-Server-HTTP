@@ -33,6 +33,14 @@ public class Communication implements Runnable{
             _out = _socket.getOutputStream();
             _in = _socket.getInputStream();
 
+            while (true){
+                System.out.println(_socket.getLocalPort() + " " + _socket.getInetAddress().toString() + " " + _socket.getPort());
+                byte[] b = new byte[5000];
+                _in.read(b);
+                System.out.println(new String(b));
+            }
+
+
 
         } catch (IOException e) {
             e.printStackTrace();
