@@ -1,9 +1,8 @@
 package server;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.StringTokenizer;
 
 public class Communication implements Runnable{
@@ -12,7 +11,7 @@ public class Communication implements Runnable{
     private PrintWriter _out;
     private BufferedReader _in;
 
-    public Communication(@NotNull Socket socket){
+    public Communication(Socket socket){
         if (socket == null)
             throw new IllegalArgumentException("instance of Socket can not be null, Aliboron");
         _socket = socket;
@@ -28,10 +27,45 @@ public class Communication implements Runnable{
         // ecrit le contenue du fichier dans le out
         // flush
 
-        _out.write("coucou mon gars");
+        if (!protocol.startsWith("HTTP/1.1")){
+            buildStatus(400);
+        }else{
+            try {
+                FileInputStream fileInputStream = new FileInputStream("/home/thiti/websites/" + filePath);
+                buildStatus(200);
+                _out.write("\r\n");
+                readFile(fileInputStream);
+            } catch (FileNotFoundException e) {
+                buildStatus(404);
+            }
+        }
+        _out.write("\r\n\r\n");
         _out.flush();
 
 
+    }
+
+    private void readFile(FileInputStream fileInputStream){
+        BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream));
+        String ligne;
+        try{
+            while((ligne = reader.readLine()) != null){
+                _out.write(ligne + "\n\r");
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void buildStatus(int code){
+        if (code == 200){
+            _out.write("HTTP/1.1 200 OK\r\n");
+        }else if(code == 400){
+            _out.write("HTTP/1.1 400 bad request\r\n");
+        }else if(code == 404){
+            _out.write("HTTP/1.1 404 resource not found\r\n");
+        }
     }
 
     private String interprate(String message){
