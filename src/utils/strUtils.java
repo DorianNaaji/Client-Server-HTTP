@@ -5,7 +5,7 @@
  */
 package utils;
 
-import CustomedExceptions.UnknownFileFormatException;
+import customedExceptions.UnknownFileFormatException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
