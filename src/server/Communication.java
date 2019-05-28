@@ -46,7 +46,7 @@ public class Communication implements Runnable{
             buildStatus(400);
         }else{
             try {
-                FileInputStream fileInputStream = new FileInputStream("/home/thiti/websites/" + filePath);
+                FileInputStream fileInputStream = new FileInputStream("C:\\www\\" + filePath);
                 buildStatus(200);
                 _out.write("\r\n");
                 readFile(filePath);
