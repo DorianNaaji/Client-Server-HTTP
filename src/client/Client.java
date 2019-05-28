@@ -1,8 +1,13 @@
 package client;
 
 import customedExceptions.UnknownFileFormatException;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -12,9 +17,12 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import utils.strUtils;
 
 public class Client
@@ -55,7 +63,6 @@ public class Client
      * -4 : UnknownFileFormatException ex
      * -5 : Impossible de lire/ouvrir le fichier
      * -6 : Impossible d'écrire le fichier spécifié dans un flux
-     * -7 : Erreur de timeout Socket
      */
     public static int PUT(String ipServer, int port, String fileName, String localFilePath)
     {
@@ -233,184 +240,183 @@ public class Client
         }
         return bArray;
     }
-    
+
     /**
-    *
-    * @param ipServer
-    * @param port
-    * @param fileName
-    * @param localFilePath
-    * @return int :
-    * 0 : Tout s'est bien passé.
-    * -1 : Problème de flux
-    * -2 : erreur de fermeture de socket
-    * -3 : Erreur lors de l'ouverture du socket (Methode OpenSocket())
-    * -4 : UnknownFileFormatException ex
-    * -5 : Impossible de lire/ouvrir le fichier
-    * -6 : Impossible d'écrire le fichier spécifié dans un flux
-    * -7 : Erreur de timeout Socket
-    */
-   public static int GET(String ipServer, int port, String fileName, String localFilePath)
-   {
-       byte[] fileInBytes = null;
-       String fileInString = null;
-       boolean isImg;
-       
-       try
-       {
-           isImg = strUtils.isImg(fileName);
-       }
-       catch (UnknownFileFormatException ex)
-       {
-           System.out.println("Exception : " + ex);
-           return -4;
-       }
-       catch (Exception e)
-       {
-           // impossible d'ouvrir / lire le fichier
-           System.out.println("Exception : Impossible de lire/ouvrir le fichier.\n" + e);
-           return -5;
-       }
-       if (isImg)
-       {
-           try
-           {
-               File fileb = new File(localFilePath);
-               fileInBytes = readFileToByteArray(fileb);
-               
-           }
-           catch (Exception e)
-           {
-               // impossible d'ouvrir / lire le fichier
-               System.out.println("Exception : Impossible de lire/ouvrir le fichier.\n" + e);
-               return -5;
-           }
-       }
-       else
-       {
-           try
-           {
-               fileInString = strUtils.readFileAsString(localFilePath);
-           }
-           catch (IOException ex)
-           {
-               // impossible d'ouvrir / lire le fichier
-               System.out.println("Exception : Impossible de lire/ouvrir le fichier.\n" + ex);
-               return -5;
-           }
-       }
+     *
+     * @param ipServer
+     * @param port
+     * @param fileName
+     * @return int :
+     * 0 : Tout s'est bien passé.
+     * -1 : Problème de flux
+     * -2 : erreur de fermeture de socket
+     * -3 : Erreur lors de l'ouverture du socket (Methode OpenSocket())
+     * -4 : UnknownFileFormatException ex
+     * -5 : Impossible de lire/ouvrir le fichier
+     * -6 : Impossible d'écrire le fichier spécifié dans un flux
+     * -7 : Impossible d'écrire le fichier local
+     */
+    public static int GET(String ipServer, int port, String fileName)
+    {
+        byte[] fileInBytes = null;
+        String fileInString = null;
+        boolean isImg;
 
-       Socket sock = OpenSocket(ipServer, port);
-       try
-       {
-           if (sock == null)
-           {
-               // -3 en cas d'erreur d'ouverture
-               System.out.println("Erreur lors de l'ouverture du socket (Methode OpenSocket())");
-               return -3;
-           }
-       }
-       catch (NullPointerException ex)
-       {
-           System.out.println("Exception : " + ex);
-           return -3;
-       }
+//        try
+//        {
+//            isImg = strUtils.isImg(fileName);
+//        }
+//        catch (UnknownFileFormatException ex)
+//        {
+//            System.out.println("Exception : " + ex);
+//            return -4;
+//        }
+//        catch (Exception e)
+//        {
+//            // impossible d'ouvrir / lire le fichier
+//            System.out.println("Exception : Impossible de lire/ouvrir le fichier.\n" + e);
+//            return -5;
+//        }
+        Socket sock = OpenSocket(ipServer, port);
+        try
+        {
+            if (sock == null)
+            {
+                // -3 en cas d'erreur d'ouverture
+                System.out.println("Erreur lors de l'ouverture du socket (Methode OpenSocket())");
+                return -3;
+            }
+        }
+        catch (NullPointerException ex)
+        {
+            System.out.println("Exception : " + ex);
+            return -3;
+        }
 
-       try
-       {
-           OutputStream outputStream = sock.getOutputStream();
-           
-         //indata représente l’objet InputStream et l’objet inputStream permet d’utiliser la zone de stockage  (buffer). 
-           InputStream indata = sock.getInputStream();
-           BufferedInputStream inputStream = new BufferedInputStream(indata);
-           
-           
-           // Envoyer la requête vers le serveur : "écrire sur le document 'doc.html'
-           // Le serveur répond. Sa répojnse contient le document ou la raison du refus
-          // String url = "http://" + ipServer + ":" + port;
-           String httpGETRequest = "GET /" + fileName + " HTTP/1.1 \r\n";
-           httpGETRequest += "Host: " + ipServer + "\r\n";
-       
+        try
+        {
+            OutputStream outputStream = sock.getOutputStream();
 
-           // écriture et envoi
-           System.out.println(httpGETRequest);
-           outputStream.write(httpGETRequest.getBytes());
-           outputStream.flush();
-           
-           //On récupère les données
-           boolean finDoc = false;
-         
-           int entier = inputStream.read();
-           
-           while(finDoc == false)
-           {
-        	   if(entier == -1) 
-        	   {
-        		   //si c'est la fin  EOF
-        		   finDoc = true;
-        	   }
-        	   else 
-        	   {
-        		   FileOutputStream fileb = new FileOutputStream(localFilePath);
-        		   fileb.write(entier);
-        		   
-        		   //fermeture du fichier    
-        		   try
-        		   { 
-        			   fileb.close();
-        		   }
-        		   catch (IOException e)
-        		   {
-        			   System.out.println("Erreur au niveau de la fermeture du fichier");
-        		   }
-        	   }
-           }
+            //indata représente l’objet InputStream et l’objet inputStream permet d’utiliser la zone de stockage  (buffer).
+            InputStream indata = sock.getInputStream();
 
+            BufferedInputStream inputStream = new BufferedInputStream(indata);
+            // Envoyer la requête vers le serveur : "écrire sur le document 'doc.html'
+            // Le serveur répond. Sa répojnse contient le document ou la raison du refus
+            // String url = "http://" + ipServer + ":" + port;
+            String httpGETRequest = "GET " + fileName + " HTTP/1.1\r\n";
+            httpGETRequest += "Host: " + ipServer + "\r\n\r\n";
+            //httpGETRequest += "Accept : */*\r\n\r\n";
 
- 
-           }
+            // écriture et envoi
+            outputStream.write(httpGETRequest.getBytes());
+            outputStream.flush();
+            System.out.println(httpGETRequest);
 
+            //On récupère les données
+//            if (isImg)
+//            {
+//                //ecriture image
+//                try
+//                {
+//
+//                }
+//                catch (Exception ex)
+//                {
+//                    System.out.println(ex);
+//                    System.out.println("Erreur d'écriture");
+//                    return -7;
+//                }
+//            }
+//            else
+//            {
+            FileOutputStream fileb = new FileOutputStream("reception.html");
+            int byteCourant;
+            boolean headerEnded = false;
+            try
+            {
+                //recevoir tous les bytes dans un tableau
+                // quand ils ont été reçus, envoyer une demande de fermeture
+                // de connexion au serveur
+                // lmao
+                while (indata.available() == 0)
+                {
+                }
 
-           
-       
-       catch (IOException ex)
-       {
-           // -1 en cas de problème de flux
-           System.out.println("Erreur lors d'utilisation d'un flux "
-                   + "sortant.\nRapport d'exception : " + ex);
-           try
-           {
-               sock.close();
-           }
-           catch (IOException exSock)
-           {
-               // -2 en cas d'erreur de fermeture de socket
-               System.out.println("Erreur lors de la fermeture du Socket. "
-                       + "\nIP serveur : " + ipServer + "\nPort serveur : "
-                       + port + " \nRapport d'exception complet : " + exSock);
-               return -2;
-           }
-           return -1;
-       }
-       
-      
-       // Fermeture de la connexion si tout s'est bien passé
-       try
-       {
-           sock.close();
-       }
-       catch (IOException ex)
-       {
-           // -2 en cas d'erreur de fermeture de socket
-           System.out.println("Erreur lors de la fermeture du Socket. "
-                   + "\nIP serveur : " + ipServer + "\nPort serveur : "
-                   + port + " \nRapport d'exception complet : " + ex);
-           return -2;
-       }
+                while ((indata.available()) != 0)
+                {
+                    byteCourant = indata.read();
+                    if (!headerEnded)
+                    {
+                        if (byteCourant == 13)
+                        {
+                            int byteSuivant0 = indata.read();
+                            if (byteSuivant0 == 10)
+                            {
+                                int byteSuivant1 = indata.read();
+                                if (byteSuivant1 == 13)
+                                {
+                                    int byteSuivant2 = indata.read();
+                                    if (byteSuivant2 == 10)
+                                    {
+                                        headerEnded = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (headerEnded)
+                    {
+                        System.out.print((char) byteCourant);
+                        fileb.write(byteCourant);
+                    }
+                }
 
-       // Le GET s'est bien passé. .
-       return 0;
-   
+                indata.close();
+                fileb.close();
+            }
+            catch (Exception e)
+            {
+                System.out.println(e);
+            }
+//            }
+        }
+        catch (IOException ex)
+        {
+            // -1 en cas de problème de flux
+            System.out.println("Erreur lors de l'utilisation d'un flux "
+                    + "sortant.\nRapport d'exception : " + ex);
+            try
+            {
+                sock.close();
+            }
+            catch (IOException exSock)
+            {
+                // -2 en cas d'erreur de fermeture de socket
+                System.out.println("Erreur lors de la fermeture du Socket. "
+                        + "\nIP serveur : " + ipServer + "\nPort serveur : "
+                        + port + " \nRapport d'exception complet : " + exSock);
+                return -2;
+            }
+            return -1;
+        }
 
-}
+        // Fermeture de la connexion si tout s'est bien passé
+        try
+        {
+            sock.close();
+        }
+        catch (IOException ex)
+        {
+            // -2 en cas d'erreur de fermeture de socket
+            System.out.println("Erreur lors de la fermeture du Socket. "
+                    + "\nIP serveur : " + ipServer + "\nPort serveur : "
+                    + port + " \nRapport d'exception complet : " + ex);
+            return -2;
+        }
+
+        // Le GET s'est bien passé. .
+        return 0;
+
+    }
 }

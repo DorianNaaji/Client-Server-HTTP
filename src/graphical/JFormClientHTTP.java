@@ -8,6 +8,7 @@ package graphical;
 import client.Client;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import utils.strUtils;
 
 /**
  *
@@ -60,6 +61,8 @@ public class JFormClientHTTP extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        _tbIpServer.setText("polytech.univ-lyon1.fr");
+
         _buttonGet.setText("Requête GET sur le fichier distant");
         _buttonGet.addActionListener(new java.awt.event.ActionListener()
         {
@@ -86,7 +89,7 @@ public class JFormClientHTTP extends javax.swing.JFrame
 
         jLabel3.setText("IP Serveur");
 
-        _tbPort.setText("1024");
+        _tbPort.setText("80");
 
         jLabel4.setText("Port serveur");
 
@@ -215,7 +218,7 @@ public class JFormClientHTTP extends javax.swing.JFrame
             String fileName = localPath.substring(localPath.lastIndexOf("\\") + 1);
             int res = Client.PUT(ipServer, port, fileName, localPath);
             this.interprateReturnCode(res);
-            System.out.println(res);
+            //System.out.println(res);
         }
     }//GEN-LAST:event__buttonPUT_localFile_TO_DistantFileActionPerformed
 
@@ -224,7 +227,7 @@ public class JFormClientHTTP extends javax.swing.JFrame
         switch (resultCode)
         {
             case 0:
-                System.out.println("success");
+                //   System.out.println("success");
                 break;
             case -1:
                 JOptionPane.showMessageDialog(null, "Une erreur de flux est survenue. Veuillez contacter un administrateur.");
@@ -251,7 +254,15 @@ public class JFormClientHTTP extends javax.swing.JFrame
     {//GEN-HEADEREND:event__buttonGetActionPerformed
         if (this.verifGET_ready())
         {
-
+            String path = System.getProperty("user.dir");
+            String ipServer = this._tbIpServer.getText();
+            int port = Integer.parseInt(this._tbPort.getText());
+            String distantFilePath = this._tbDistantFile.getText();
+            String fileName = distantFilePath.substring(distantFilePath.lastIndexOf("/") + 1);
+            //String localFilePath = path + "\\" + fileName;
+            int res = Client.GET(ipServer, port, distantFilePath);
+            this.interprateReturnCode(res);
+            //   System.out.println(res);
         }
     }//GEN-LAST:event__buttonGetActionPerformed
 
@@ -358,11 +369,11 @@ public class JFormClientHTTP extends javax.swing.JFrame
             errorMessage += "- Renseigner un port serveur\n";
             res = false;
         }
-        if (this._tbDistantFile.getText().equals(""))
-        {
-            errorMessage += "- Renseigner un fichier distant";
-            res = false;
-        }
+//        if (this._tbDistantFile.getText().equals(""))
+//        {
+//            errorMessage += "- Renseigner un fichier distant";
+//            res = false;
+//        }
         if (res == false)
         {
             JOptionPane.showMessageDialog(null, errorMessage);
