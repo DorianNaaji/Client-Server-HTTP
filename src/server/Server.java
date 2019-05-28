@@ -10,14 +10,13 @@ public class Server implements Runnable
     public static final int defaultPort = 1026;
 
     private ServerSocket _serverSocket;
-    private Socket _socket; //à méditer
 
     public Server(int port) throws IOException {
         _serverSocket = new ServerSocket(port);
     }
 
-    public void createConnexion(Socket _socket){
-    	new Thread(new Communication(_socket)).start();
+    public void createConnexion(Socket socket){
+    	new Thread(new Communication(socket)).start();
     }
 
   
@@ -28,8 +27,8 @@ public class Server implements Runnable
     	{
     		try {
                 System.out.println("[SERVER] Listening...");
-    			_socket=_serverSocket.accept();
-    			createConnexion(_socket);
+    			Socket socket=_serverSocket.accept();
+    			createConnexion(socket);
     			
     		} catch (IOException e) {
     			// TODO Auto-generated catch block

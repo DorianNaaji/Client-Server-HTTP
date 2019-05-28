@@ -7,9 +7,24 @@ import java.util.StringTokenizer;
 
 public class Communication implements Runnable{
 
+    private static final String WWW_PATH = "/home/thiti/websites";
+
     private Socket _socket;
     private PrintWriter _out;
     private BufferedReader _in;
+
+    private String _command;
+    private String _filePath;
+    private String _version;
+
+    private String _contentType;
+    private String _contentLength;
+    private String _contentLocation;
+
+    private String _body;
+    private String _codeMessage;
+    private int _code;
+
 
     public Communication(Socket socket){
         if (socket == null)
@@ -34,27 +49,37 @@ public class Communication implements Runnable{
                 FileInputStream fileInputStream = new FileInputStream("/home/thiti/websites/" + filePath);
                 buildStatus(200);
                 _out.write("\r\n");
-                readFile(fileInputStream);
+                readFile(filePath);
             } catch (FileNotFoundException e) {
                 buildStatus(404);
             }
         }
         _out.write("\r\n\r\n");
         _out.flush();
-
-
     }
 
-    private void readFile(FileInputStream fileInputStream){
-        BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream));
-        String ligne;
-        try{
-            while((ligne = reader.readLine()) != null){
-                _out.write(ligne + "\n\r");
+    /**
+     * La méthode ReadFile permet la lecture d'un fichier
+     * @param filePath
+     */
+    private void readFile(String filePath){
+
+        try {
+            FileInputStream fileInputStream = new FileInputStream(WWW_PATH + filePath);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fileInputStream));
+            StringBuilder result = new StringBuilder();
+            String line;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    result.append(line + "\r\n");
+                }
+                reader.close();
+            } catch (IOException e) {
+                _body = null;
             }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            _body = result.toString();
+        } catch (FileNotFoundException e) {
+            _body = null;
         }
     }
 
@@ -68,7 +93,13 @@ public class Communication implements Runnable{
         }
     }
 
+    public void sendAnwser(){
+
+    }
+
     private String interprate(String message){
+        System.out.println(message);
+        /*
         StringTokenizer stringTokenizer = new StringTokenizer(message," ");
         while(stringTokenizer.hasMoreElements()){
             String element = (String)stringTokenizer.nextElement();
@@ -82,6 +113,7 @@ public class Communication implements Runnable{
 
             }
         }
+        */
         return null;
     }
 
@@ -92,7 +124,17 @@ public class Communication implements Runnable{
             _in =  new BufferedReader(new InputStreamReader(_socket.getInputStream()));
 
             while (true){
-                interprate(_in.readLine());
+                String line;
+                StringBuilder message = new StringBuilder();
+                while((line = _in.readLine()) != null){
+                    message.append(line);
+                    message.append("\n");
+                    interprate(message.toString());
+                }
+
+                //System.out.print(_socket.getPort() + " | "+_socket.getLocalPort()   + " : ");
+
+
             }
 
         } catch (IOException e) {
