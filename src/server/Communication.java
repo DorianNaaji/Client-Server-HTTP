@@ -1,5 +1,8 @@
 package server;
 
+import customedexceptions.UnknownFileFormatException;
+import utils.StrUtils;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -24,7 +27,7 @@ public class Communication implements Runnable{
 
     private String _body;
     private String _codeMessage;
-    private int _code;
+    private String _code;
 
 
     public Communication(Socket socket){
@@ -34,22 +37,25 @@ public class Communication implements Runnable{
     }
 
     private void decodeRequest(){
-        if (!_version.equalsIgnoreCase("HTTP/1.1")){
-            // error
-        }else if(_command.equalsIgnoreCase("GET")){
-            readGetRequest();
-            decodeHeaderRequest();
-        }else if(_command.equalsIgnoreCase("PUT")){
-            readPutRequest();
-            decodeHeaderRequest();
-            decodePutRequest();
-        }else{
-            // error
+        try {
+
+            if (!_version.equalsIgnoreCase("HTTP/1.1")) {
+                // error
+            } else if (_command.equalsIgnoreCase("GET")) {
+                readGetRequest();
+                decodeHeaderRequest();
+                readFile(_filePath);
+                _contentLength = Integer.toString(_body.length());
+                _contentType = StrUtils.getContentType(_filePath);
+            } else if (_command.equalsIgnoreCase("PUT")) {
+                readPutRequest();
+                writeFile(_filePath);
+            } else {
+                // error
+            }
+        } catch (UnknownFileFormatException e) {
+
         }
-    }
-
-    private void decodePutRequest(){
-
     }
 
     private void decodeHeaderRequest(){
@@ -88,22 +94,36 @@ public class Communication implements Runnable{
                     result.append(line + "\r\n");
                 }
                 reader.close();
+                result.append("\r\n");
             } catch (IOException e) {
                 _body = null;
             }
             _body = result.toString();
         } catch (FileNotFoundException e) {
-            _body = null;
+            _body = "Error 404";
+            _code = "404";
+            _codeMessage = "resource not found";
         }
     }
 
-    private void buildStatus(int code){
-        if (code == 200){
-            _out.write("HTTP/1.1 200 OK\r\n");
-        }else if(code == 400){
-            _out.write("HTTP/1.1 400 bad request\r\n");
-        }else if(code == 404){
-            _out.write("HTTP/1.1 404 resource not found\r\n");
+    private void writeFile(String filePath){
+        try {
+            File file = new File(WWW_PATH + filePath);
+            file.createNewFile();
+            FileOutputStream fileOutputStream = new FileOutputStream(file,false);
+
+            fileOutputStream.write(_body.getBytes());
+            fileOutputStream.close();
+            _contentLocation = filePath;
+            _code = "201";
+            _codeMessage = "Created";
+
+        } catch (FileNotFoundException e) {
+            _body = "Error 404";
+            _code = "404";
+            _codeMessage = "resource not found";
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -133,20 +153,20 @@ public class Communication implements Runnable{
         try {
             message = _in.readLine();
             StringTokenizer stringTokenizer = new StringTokenizer(message," ");
-            while(stringTokenizer.hasMoreElements()){
-                String element = (String)stringTokenizer.nextElement();
+            while(stringTokenizer.hasMoreElements()) {
+                String element = (String) stringTokenizer.nextElement();
                 if (element.equalsIgnoreCase("GET") || element.equalsIgnoreCase("PUT")) {
                     _command = element;
                     _filePath = (String) stringTokenizer.nextElement();
                     _version = (String) stringTokenizer.nextElement();
+                    decodeRequest();
+                    sendAnwser();
                 }
             }
-            decodeRequest();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -167,7 +187,45 @@ public class Communication implements Runnable{
     }
 
     private void readPutRequest(){
+        String line;
+        try {
+            StringBuilder header = new StringBuilder();
+            do {
+                line = _in.readLine();
+                header.append(line + "\r\n");
+            } while (!line.equalsIgnoreCase(""));
+            _header = header.toString();
+            decodeHeaderRequest();
 
+            int i = 0;
+            char[] buffer = new char[1];
+            StringBuilder body = new StringBuilder();
+            do{
+                _in.read(buffer,0,buffer.length);
+                body.append(buffer);
+                i++;
+            }while(i <
+                    Integer.parseInt(_contentLength));
+            _body = body.toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void init(){
+        _command = null;
+        _filePath = null;
+        _version = null;
+
+        _header = null;
+        _contentType = null;
+        _contentLength = null;
+        _contentLocation = null;
+
+        _body = null;
+        _codeMessage = null;
+        _code = null;
     }
 
     @Override
@@ -178,6 +236,7 @@ public class Communication implements Runnable{
 
             do {
                 readRequest();
+                init();
             }while(true);
 
 
