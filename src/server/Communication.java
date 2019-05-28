@@ -17,6 +17,7 @@ public class Communication implements Runnable{
     private String _filePath;
     private String _version;
 
+    private String _header;
     private String _contentType;
     private String _contentLength;
     private String _contentLocation;
@@ -32,30 +33,43 @@ public class Communication implements Runnable{
         _socket = socket;
     }
 
-    private void put(String message){
+    private void decodeRequest(){
+        if (!_version.equalsIgnoreCase("HTTP/1.1")){
+            // error
+        }else if(_command.equalsIgnoreCase("GET")){
+            readGetRequest();
+            decodeHeaderRequest();
+        }else if(_command.equalsIgnoreCase("PUT")){
+            readPutRequest();
+            decodeHeaderRequest();
+            decodePutRequest();
+        }else{
+            // error
+        }
+    }
+
+    private void decodePutRequest(){
 
     }
 
-    private void get(String filePath, String protocol){
-        // check protocol
-        // ouvre le fichier s'il existe
-        // ecrit le contenue du fichier dans le out
-        // flush
-
-        if (!protocol.startsWith("HTTP/1.1")){
-            buildStatus(400);
-        }else{
-            try {
-                FileInputStream fileInputStream = new FileInputStream("C:\\www\\" + filePath);
-                buildStatus(200);
-                _out.write("\r\n");
-                readFile(filePath);
-            } catch (FileNotFoundException e) {
-                buildStatus(404);
+    private void decodeHeaderRequest(){
+        StringTokenizer stringTokenizer = new StringTokenizer(_header,"\r\n");
+        while(stringTokenizer.hasMoreElements()){
+            String element = (String) stringTokenizer.nextElement();
+            if (element.startsWith("Content-Type:")){
+                StringTokenizer st = new StringTokenizer(element," ");
+                st.nextElement();
+                _contentType = (String) st.nextElement();
+            }else if(element.startsWith("Content-Length:")){
+                StringTokenizer st = new StringTokenizer(element," ");
+                st.nextElement();
+                _contentLength = (String) st.nextElement();
+            }else if(element.startsWith("Content-location:")){
+                StringTokenizer st = new StringTokenizer(element," ");
+                st.nextElement();
+                _contentLocation = (String) st.nextElement();
             }
         }
-        _out.write("\r\n\r\n");
-        _out.flush();
     }
 
     /**
@@ -94,27 +108,66 @@ public class Communication implements Runnable{
     }
 
     public void sendAnwser(){
+        if(_command.equalsIgnoreCase("GET")){
+            _out.write(_version + " " + _code + " " + _codeMessage + "\r\n");
+            _out.write("Content-Length: " + _contentLength + "\r\n");
+            _out.write("Content-Type: " + _contentType + "\r\n");
+            _out.write("\r\n");
+            _out.write(_body + "\r\n");
+            _out.write("\r\n");
+
+        }else if(_command.equalsIgnoreCase("PUT")){
+            _out.write(_version + " " + _code + " " + _codeMessage + "\r\n");
+            _out.write("Content-location: " + _contentLocation + "\r\n");
+            _out.write("\r\n");
+        }else{
+
+        }
+        _out.flush();
 
     }
 
-    private String interprate(String message){
-        System.out.println(message);
-        /*
-        StringTokenizer stringTokenizer = new StringTokenizer(message," ");
-        while(stringTokenizer.hasMoreElements()){
-            String element = (String)stringTokenizer.nextElement();
-            if (element.equalsIgnoreCase("GET")){
-                String filePath = (String)stringTokenizer.nextElement(); // check si prochiane ele existe
-                String protocol = (String)stringTokenizer.nextElement(); // check si prochiane ele existe
-                get(filePath,protocol);
-            }else if(element.equalsIgnoreCase("PUT")){
+    private String readRequest(){
 
-            }else{
-
+        String message = null;
+        try {
+            message = _in.readLine();
+            StringTokenizer stringTokenizer = new StringTokenizer(message," ");
+            while(stringTokenizer.hasMoreElements()){
+                String element = (String)stringTokenizer.nextElement();
+                if (element.equalsIgnoreCase("GET") || element.equalsIgnoreCase("PUT")) {
+                    _command = element;
+                    _filePath = (String) stringTokenizer.nextElement();
+                    _version = (String) stringTokenizer.nextElement();
+                }
             }
+            decodeRequest();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        */
+
         return null;
+    }
+
+    private void readGetRequest(){
+        String line;
+        try {
+
+            StringBuilder header = new StringBuilder();
+            do {
+                line = _in.readLine();
+                header.append(line + "\r\n");
+            } while (!line.equalsIgnoreCase(""));
+            _header = header.toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void readPutRequest(){
+
     }
 
     @Override
@@ -123,19 +176,11 @@ public class Communication implements Runnable{
             _out = new PrintWriter(_socket.getOutputStream());
             _in =  new BufferedReader(new InputStreamReader(_socket.getInputStream()));
 
-            while (true){
-                String line;
-                StringBuilder message = new StringBuilder();
-                while((line = _in.readLine()) != null){
-                    message.append(line);
-                    message.append("\n");
-                    interprate(message.toString());
-                }
-
-                //System.out.print(_socket.getPort() + " | "+_socket.getLocalPort()   + " : ");
+            do {
+                readRequest();
+            }while(true);
 
 
-            }
 
         } catch (IOException e) {
             e.printStackTrace();
