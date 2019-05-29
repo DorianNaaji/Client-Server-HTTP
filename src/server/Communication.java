@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 
 public class Communication implements Runnable{
 
-    private static final String WWW_PATH = "/home/thiti/websites";
+    private static final String WWW_PATH = "C://www";
 
     private Socket _socket;
     private PrintWriter _out;
@@ -49,7 +49,9 @@ public class Communication implements Runnable{
                 _contentType = StrUtils.getContentType(_filePath);
             } else if (_command.equalsIgnoreCase("PUT")) {
                 readPutRequest();
+                System.out.println(_filePath);
                 writeFile(_filePath);
+                
             } else {
                 // error
             }
@@ -60,13 +62,14 @@ public class Communication implements Runnable{
 
     private void decodeHeaderRequest(){
         StringTokenizer stringTokenizer = new StringTokenizer(_header,"\r\n");
+        System.out.println(_header);
         while(stringTokenizer.hasMoreElements()){
             String element = (String) stringTokenizer.nextElement();
-            if (element.startsWith("Content-Type:")){
+            if (element.startsWith("Content-type:")){
                 StringTokenizer st = new StringTokenizer(element," ");
                 st.nextElement();
                 _contentType = (String) st.nextElement();
-            }else if(element.startsWith("Content-Length:")){
+            }else if(element.startsWith("Content-length:")){
                 StringTokenizer st = new StringTokenizer(element," ");
                 st.nextElement();
                 _contentLength = (String) st.nextElement();
@@ -187,6 +190,7 @@ public class Communication implements Runnable{
     }
 
     private void readPutRequest(){
+    	System.out.println(_contentLength);
         String line;
         try {
             StringBuilder header = new StringBuilder();
@@ -201,12 +205,14 @@ public class Communication implements Runnable{
             char[] buffer = new char[1];
             StringBuilder body = new StringBuilder();
             do{
-                _in.read(buffer,0,buffer.length);
-                body.append(buffer);
+                if (_in.read(buffer,0,buffer.length) != -1) {
+                	body.append(buffer);                   	
+                }
                 i++;
-            }while(i <
-                    Integer.parseInt(_contentLength));
+                
+            }while(i < Integer.parseInt(_contentLength));
             _body = body.toString();
+            System.out.println(_contentLength);
 
         } catch (IOException e) {
             e.printStackTrace();
