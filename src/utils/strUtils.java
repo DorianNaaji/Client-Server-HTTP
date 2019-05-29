@@ -28,42 +28,19 @@ public class strUtils
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
-    public static String getContentType(String fileName) throws UnknownFileFormatException
-    {
-        String extension = getFileExtension(fileName);
-        if (extension.equals("png") || extension.equals("jpg"))
-        {
-            return "image/" + extension;
-        }
-        else if (extension.equals("txt") || extension.equals("html"))
-        {
-            return "text/" + extension;
-        }
-        throw new UnknownFileFormatException("The file format " + extension + " is not handled by the"
-                + " application.");
-    }
-
     /**
      * Checks if a file is an image or note
      *
      * @param nomFichier the filename
      * @return true if the file is .png or .jpg. False if it is .txt. Exception
      * otherwise
-     * @throws UnknownFileFormatException if the format is not .txt, .png or
-     * .jpg
      */
-    public static boolean isImg(String nomFichier) throws UnknownFileFormatException
+    public static boolean isImg(String nomFichier)
     {
         String extension = nomFichier.substring(nomFichier.lastIndexOf(".") + 1);
-        if ("txt".equals(extension) || "html".equals(extension))
-        {
-            return false;
-        }
-        else if ("png".equals(extension) || "jpg".equals(extension))
-        {
-            return true;
-        }
-        throw new UnknownFileFormatException("The file format \" " + extension + "\" is not managed by the program.");
+
+        return ("png".equals(extension) || "jpg".equals(extension));
+
     }
 
     public static String readFileAsString(String stringPath) throws IOException

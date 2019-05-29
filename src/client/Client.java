@@ -60,7 +60,6 @@ public class Client
      * -1 : Problème de flux
      * -2 : erreur de fermeture de socket
      * -3 : Erreur lors de l'ouverture du socket (Methode OpenSocket())
-     * -4 : UnknownFileFormatException ex
      * -5 : Impossible de lire/ouvrir le fichier
      * -6 : Impossible d'écrire le fichier spécifié dans un flux
      */
@@ -68,22 +67,8 @@ public class Client
     {
         byte[] fileInBytes = null;
         String fileInString = null;
-        boolean isImg;
-        try
-        {
-            isImg = strUtils.isImg(fileName);
-        }
-        catch (UnknownFileFormatException ex)
-        {
-            System.out.println("Exception : " + ex);
-            return -4;
-        }
-        catch (Exception e)
-        {
-            // impossible d'ouvrir / lire le fichier
-            System.out.println("Exception : Impossible de lire/ouvrir le fichier.\n" + e);
-            return -5;
-        }
+        boolean isImg = strUtils.isImg(fileName);
+
         if (isImg)
         {
             try
@@ -136,22 +121,11 @@ public class Client
             String url = "http://" + ipServer + ":" + port;
             String httpPUTRequest = "PUT /" + fileName + " HTTP/1.1 \r\n";
             httpPUTRequest += "Host: " + ipServer + "\r\n";
-            try
-            {
-                httpPUTRequest += "Content-type: " + strUtils.getContentType(fileName) + " \r\n";
-            }
-            catch (UnknownFileFormatException ex)
-            {
-                // -4 si format de fichier non géré par l'application
-                System.out.println("Exception : " + ex);
-                sock.close();
-                return -4;
-            }
             if (isImg && fileInBytes != null)
             {
                 // (+1 car on compte le retour chariot après le header Content-length)
                 int length = fileInBytes.length + 1;
-                httpPUTRequest += "Content-length: " + length + "\r\n\n";
+                httpPUTRequest += "Content-length: " + length + "\r\n\r\n";
                 for (int i = 0; i < fileInBytes.length; i++)
                 {
                     httpPUTRequest += fileInBytes[i];
@@ -251,7 +225,6 @@ public class Client
      * -1 : Problème de flux
      * -2 : erreur de fermeture de socket
      * -3 : Erreur lors de l'ouverture du socket (Methode OpenSocket())
-     * -4 : UnknownFileFormatException ex
      * -5 : Impossible de lire/ouvrir le fichier
      * -6 : Impossible d'écrire le fichier spécifié dans un flux
      * -7 : Impossible d'écrire le fichier local
@@ -260,23 +233,8 @@ public class Client
     {
         byte[] fileInBytes = null;
         String fileInString = null;
-        boolean isImg;
+        boolean isImg = strUtils.isImg(fileName);
 
-//        try
-//        {
-//            isImg = strUtils.isImg(fileName);
-//        }
-//        catch (UnknownFileFormatException ex)
-//        {
-//            System.out.println("Exception : " + ex);
-//            return -4;
-//        }
-//        catch (Exception e)
-//        {
-//            // impossible d'ouvrir / lire le fichier
-//            System.out.println("Exception : Impossible de lire/ouvrir le fichier.\n" + e);
-//            return -5;
-//        }
         Socket sock = OpenSocket(ipServer, port);
         try
         {
@@ -314,24 +272,19 @@ public class Client
             System.out.println(httpGETRequest);
 
             //On récupère les données
-//            if (isImg)
-//            {
-//                //ecriture image
-//                try
-//                {
-//
-//                }
-//                catch (Exception ex)
-//                {
-//                    System.out.println(ex);
-//                    System.out.println("Erreur d'écriture");
-//                    return -7;
-//                }
-//            }
-//            else
-//            {
-            FileOutputStream fileb = new FileOutputStream("reception.html");
+            FileOutputStream fileb;
+            if (isImg)
+            {
+                String extension = strUtils.getFileExtension(fileName);
+                fileb = new FileOutputStream("reception." + extension);
+            }
+            else
+            {
+                fileb = new FileOutputStream("reception.html");
+            }
             int byteCourant;
+            int count = 0;
+            String responseCode = "";
             boolean headerEnded = false;
             try
             {
@@ -339,24 +292,31 @@ public class Client
                 // quand ils ont été reçus, envoyer une demande de fermeture
                 // de connexion au serveur
                 // lmao
-                while (indata.available() == 0)
+                while (inputStream.available() == 0)
                 {
                 }
 
-                while ((indata.available()) != 0)
+                while ((inputStream.available()) != 0)
                 {
-                    byteCourant = indata.read();
+
+                    byteCourant = inputStream.read();
+                    if (count == 9 || count == 10 || count == 11)
+                    {
+                        responseCode += (char) byteCourant;
+                        // System.out.print(responseCode);
+                    }
                     if (!headerEnded)
                     {
+                        System.out.print((char) byteCourant);
                         if (byteCourant == 13)
                         {
-                            int byteSuivant0 = indata.read();
+                            int byteSuivant0 = inputStream.read();
                             if (byteSuivant0 == 10)
                             {
-                                int byteSuivant1 = indata.read();
+                                int byteSuivant1 = inputStream.read();
                                 if (byteSuivant1 == 13)
                                 {
-                                    int byteSuivant2 = indata.read();
+                                    int byteSuivant2 = inputStream.read();
                                     if (byteSuivant2 == 10)
                                     {
                                         headerEnded = true;
@@ -367,19 +327,27 @@ public class Client
                     }
                     else if (headerEnded)
                     {
-                        System.out.print((char) byteCourant);
+                        //System.out.print((char) byteCourant);
                         fileb.write(byteCourant);
                     }
+                    count++;
                 }
 
                 indata.close();
                 fileb.close();
+                int responseInt = Integer.parseInt(responseCode);
+                System.out.println(responseCode);
+                if (responseInt != 200)
+                {
+                    // code d'erreur
+                    _errCode = responseInt;
+                    return -8;
+                }
             }
             catch (Exception e)
             {
                 System.out.println(e);
             }
-//            }
         }
         catch (IOException ex)
         {
@@ -418,5 +386,12 @@ public class Client
         // Le GET s'est bien passé. .
         return 0;
 
+    }
+
+    private static int _errCode;
+
+    public static int getErrorCode()
+    {
+        return _errCode;
     }
 }
