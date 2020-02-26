@@ -24,31 +24,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import utils.strUtils;
+import utils.StrUtils;
+import customedexceptions.UnknownFileFormatException;
 
 public class Client
 {
-
-    private static Socket OpenSocket(String adIP, int port)
-    {
-        Socket sc = null;
-        try
-        {
-            InetAddress server = InetAddress.getByName(adIP);
-            sc = new Socket(server, port);
+    public static void main(String[] args) {
+        try {
+            Socket sock = new Socket("localhost",1026);
+            System.out.println("Socket port: " + sock.getPort());
+            System.out.println("Socket local port: " + sock.getLocalPort());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        catch (UnknownHostException ex)
-        {
-            System.out.println("Erreur au niveau du port ");
-            return sc;
-        }
-        catch (IOException ex)
-        {
-            System.out.println("Erreur au niveau de l'ouverture du Socket");
-            return sc;
-        }
-        return sc;
     }
-
     /**
      *
      * @param ipServer

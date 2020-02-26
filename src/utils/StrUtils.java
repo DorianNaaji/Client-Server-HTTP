@@ -5,7 +5,8 @@
  */
 package utils;
 
-import customedExceptions.UnknownFileFormatException;
+
+import customedexceptions.UnknownFileFormatException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -14,7 +15,7 @@ import java.nio.file.Paths;
  *
  * @author Dorian
  */
-public class strUtils
+public class StrUtils
 {
 
     /**
@@ -28,6 +29,22 @@ public class strUtils
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
+
+    public static String getContentType(String fileName) throws customedexceptions.UnknownFileFormatException
+    {
+        String extension = getFileExtension(fileName);
+        if (extension.equals("png") || extension.equals("jpg"))
+        {
+            return "image/" + extension;
+        }
+        else if (extension.equals("txt") || extension.equals("html"))
+        {
+            return "text/" + extension;
+        }
+        throw new customedexceptions.UnknownFileFormatException("The file format " + extension + " is not handled by the"
+                + " application.");
+    }
+    
     /**
      * Checks if a file is an image or note
      *
