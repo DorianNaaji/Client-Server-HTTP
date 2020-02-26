@@ -5,8 +5,8 @@
  */
 package utils;
 
-import customedexceptions.UnknownFileFormatException;
 
+import customedexceptions.UnknownFileFormatException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -29,6 +29,7 @@ public class StrUtils
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
+
     public static String getContentType(String fileName) throws customedexceptions.UnknownFileFormatException
     {
         String extension = getFileExtension(fileName);
@@ -43,28 +44,20 @@ public class StrUtils
         throw new customedexceptions.UnknownFileFormatException("The file format " + extension + " is not handled by the"
                 + " application.");
     }
-
+    
     /**
      * Checks if a file is an image or note
      *
      * @param nomFichier the filename
      * @return true if the file is .png or .jpg. False if it is .txt. Exception
      * otherwise
-     * @throws UnknownFileFormatException if the format is not .txt, .png or
-     * .jpg
      */
-    public static boolean isImg(String nomFichier) throws UnknownFileFormatException
+    public static boolean isImg(String nomFichier)
     {
         String extension = nomFichier.substring(nomFichier.lastIndexOf(".") + 1);
-        if ("txt".equals(extension) || "html".equals(extension))
-        {
-            return false;
-        }
-        else if ("png".equals(extension) || "jpg".equals(extension))
-        {
-            return true;
-        }
-        throw new UnknownFileFormatException("The file format \" " + extension + "\" is not managed by the program.");
+
+        return ("png".equals(extension) || "jpg".equals(extension));
+
     }
 
     public static String readFileAsString(String stringPath) throws IOException

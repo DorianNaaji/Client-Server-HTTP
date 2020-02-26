@@ -11,6 +11,9 @@ public class Server implements Runnable
 
     private ServerSocket _serverSocket;
 
+    public static void main(String[] args)
+    {
+
     public Server(int port) throws IOException {
         _serverSocket = new ServerSocket(port);
     }
@@ -18,8 +21,6 @@ public class Server implements Runnable
     public void createConnexion(Socket socket){
     	new Thread(new Communication(socket)).start();
     }
-
-  
 
     @Override
     public void run() {
